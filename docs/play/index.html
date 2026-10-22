@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companion Forge — an offline pocket console for the Forge system</title>
+<meta name="description" content="An offline pocket console for the drsamonline Forge system: the build queue, the state, the kit graph and the repo fleet — on your device, no network.">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header,main,footer{max-width:900px;margin:0 auto;padding:18px}
+  h1{margin:0 0 2px;font-size:24px}
+  h2{font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+  .muted{color:var(--mut)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  input,select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit}
+  input[type=search]{flex:1;min-width:180px}
+  button{background:var(--acc);color:#06210f;border:0;border-radius:10px;padding:9px 13px;font-weight:600;cursor:pointer}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .card .k{font-size:12px;color:var(--mut)}
+  .card .v{font-size:22px;font-weight:700;margin-top:3px}
+  .tabs{display:flex;gap:8px;margin:18px 0 10px;flex-wrap:wrap}
+  .tab{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600}
+  .tab.on{background:var(--card);border-color:var(--acc);color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  tr:hover td{background:var(--card)}
+  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600}
+  .p-done{background:rgba(34,197,94,.16);color:var(--acc)}
+  .p-todo{background:rgba(154,163,178,.16);color:var(--mut)}
+  .p-doing{background:rgba(59,130,246,.18);color:#60a5fa}
+  .p-blocked{background:rgba(245,158,11,.18);color:#f59e0b}
+  .yes{color:var(--acc);font-weight:600}
+  .wrap{overflow-x:auto}
+  footer{font-size:13px}
+  a{color:var(--acc)}
+  .empty{color:var(--mut);padding:14px 4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Companion Forge</h1>
+  <p class="muted">The Forge system in your pocket — the queue, the state, the kit graph and the fleet. Offline, on your device.</p>
+</header>
+<main>
+  <div id="cards" class="cards"></div>
+
+  <div class="tabs">
+    <button class="tab on" data-view="queue" id="t-queue">Queue</button>
+    <button class="tab" data-view="kits" id="t-kits">Kits</button>
+    <button class="tab" data-view="fleet" id="t-fleet">Fleet</button>
+  </div>
+
+  <div class="row">
+    <input id="q" type="search" placeholder="Search…" aria-label="Search">
+    <button id="export" class="ghost">Export CSV</button>
+    <button id="theme" class="ghost">Toggle theme</button>
+    <div>
+      <select id="lang" aria-label="Language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="gu">ગુજરાતી</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <table id="table">
+      <thead><tr id="head"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div id="empty" class="empty" hidden>Nothing matches.</div>
+  </div>
+
+  <h2>Recent runs</h2>
+  <div id="log" class="card muted" style="font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap"></div>
+</main>
+<footer class="muted">
+  Snapshot generated <span id="gen">—</span> from <span id="src">forge + registry</span>.
+  Read-only and offline; it never calls the network.<br>
+  Built with Forge · © 2026 Dr Sohil Momin · no accounts, no network, no telemetry
+</footer>
+
+<script src="web-kit.js"></script>
+<script src="forge.js"></script>
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.ForgeData, F = window.Forge;
+  Loom.theme.apply();
+
+  /* app-specific strings on top of the kit's EN/HI/GU */
+  Loom.i18n.extend("en", { cq_title: "Companion Forge", cq_queue: "Queue", cq_kits: "Kits", cq_fleet: "Fleet", cq_recent: "Recent runs" });
+  Loom.i18n.extend("hi", { cq_title: "कम्पैनियन फ़ोर्ज", cq_queue: "कतार", cq_kits: "किट", cq_fleet: "फ़्लीट", cq_recent: "हाल के रन" });
+  Loom.i18n.extend("gu", { cq_title: "કમ્પેનિયન ફોર્જ", cq_queue: "કતાર", cq_kits: "કિટ", cq_fleet: "ફ્લીટ", cq_recent: "તાજેતરના રન" });
+
+  var VIEWS = {
+    queue: { rows: F.queueRows(D), cols: ["id", "label", "kind", "deps", "status", "runnable"] },
+    kits:  { rows: F.kitRows(D),  cols: ["id", "type", "status", "consumers", "repos"] },
+    fleet: { rows: F.repoRows(D), cols: ["name", "role", "score", "visibility", "homepage"] }
+  };
+  var view = "queue";
+  var query = "";
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]; }); }
+  function cellHtml(col, v) {
+    if (col === "status") return '<span class="pill p-' + esc(v) + '">' + esc(v) + "</span>";
+    if (col === "runnable") return v ? '<span class="yes">yes</span>' : '<span class="muted">—</span>';
+    if (col === "homepage" && v) return '<a href="' + esc(v) + '" rel="noopener">link</a>';
+    if (col === "repos") return '<span class="muted">' + esc(v || "—") + "</span>";
+    return esc(v);
+  }
+
+  function renderCards() {
+    var s = F.summarize(D);
+    var items = [
+      ["Items done", s.done], ["Queue remaining", s.todo], ["Kits live", s.kits + "/" + s.kitsTotal],
+      ["Repos", s.repos], ["Avg score", s.avgScore], ["Blocked", s.blocked]
+    ];
+    document.getElementById("cards").innerHTML = items.map(function (it) {
+      return '<div class="card"><div class="k">' + esc(it[0]) + '</div><div class="v">' + esc(it[1]) + "</div></div>";
+    }).join("");
+  }
+
+  function renderTable() {
+    var v = VIEWS[view];
+    var rows = F.search(v.rows, query);
+    document.getElementById("head").innerHTML = v.cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("");
+    document.getElementById("body").innerHTML = rows.map(function (r) {
+      return "<tr>" + v.cols.map(function (c) { return "<td>" + cellHtml(c, r[c]) + "</td>"; }).join("") + "</tr>";
+    }).join("");
+    document.getElementById("empty").hidden = rows.length !== 0;
+  }
+
+  function render() { renderCards(); renderTable(); }
+
+  /* tabs */
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (btn) {
+    btn.addEventListener("click", function () {
+      view = btn.getAttribute("data-view");
+      Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) { b.classList.toggle("on", b === btn); });
+      renderTable();
+    });
+  });
+
+  /* search */
+  document.getElementById("q").addEventListener("input", function (e) {
+    query = e.target.value; renderTable();
+    Loom.a11y.announce(Forge.search(VIEWS[view].rows, query).length + " rows");
+  });
+
+  /* export */
+  document.getElementById("export").addEventListener("click", function () {
+    var rows = F.search(VIEWS[view].rows, query);
+    Loom.csv.download("companion-forge-" + view + ".csv", F.toCSV(rows));
+  });
+
+  /* theme */
+  document.getElementById("theme").addEventListener("click", function () { Loom.theme.toggle(); });
+
+  /* language */
+  var langSel = document.getElementById("lang");
+  langSel.value = Loom.i18n.lang;
+  langSel.addEventListener("change", function (e) {
+    Loom.i18n.setLang(e.target.value);
+    document.getElementById("t-queue").textContent = Loom.i18n.t("cq_queue");
+    document.getElementById("t-kits").textContent = Loom.i18n.t("cq_kits");
+    document.getElementById("t-fleet").textContent = Loom.i18n.t("cq_fleet");
+    document.getElementById("q").placeholder = Loom.i18n.t("search");
+    document.getElementById("export").textContent = Loom.i18n.t("export");
+  });
+
+  /* header + footer from the snapshot */
+  document.getElementById("gen").textContent = D.generated;
+  document.getElementById("src").textContent = D.source;
+  document.getElementById("log").textContent = (D.progress || []).join("\n");
+
+  render();
+})();
+</script>
+</body>
+</html>
