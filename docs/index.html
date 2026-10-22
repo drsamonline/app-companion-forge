@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companion Forge — an offline pocket console for the Forge system</title>
+<meta name="description" content="An offline pocket console for the drsamonline Forge system: the build queue, the state, the kit dependency graph and the repo fleet — on your device, no network.">
+<meta property="og:title" content="Companion Forge">
+<meta property="og:description" content="The Forge system in your pocket: queue, state, kits and fleet — offline.">
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:32px 20px 60px}
+  h1{font-size:34px;margin:0 0 6px}
+  h2{font-size:17px;margin:34px 0 8px}
+  .mut{color:var(--mut)}
+  .cta{display:inline-block;background:var(--acc);color:#06210f;text-decoration:none;font-weight:700;border-radius:11px;padding:12px 18px;margin:16px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card b{display:block;margin-bottom:3px}
+  footer{color:var(--mut);font-size:13px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+  a{color:var(--acc)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Companion Forge</h1>
+  <p class="mut">The drsamonline Forge system in your pocket — the build queue, the
+  state, the kit dependency graph and the repo fleet, in one offline page. No
+  accounts, no network, no telemetry.</p>
+  <a class="cta" href="./play/">Open the console &rarr;</a>
+
+  <h2>What you get</h2>
+  <div class="grid">
+    <div class="card"><b>One-glance summary</b><span class="mut">Items done, queue remaining, kits live, fleet size.</span></div>
+    <div class="card"><b>The build queue</b><span class="mut">Every item with its dependencies and status.</span></div>
+    <div class="card"><b>The kit graph</b><span class="mut">Which kit serves which apps.</span></div>
+    <div class="card"><b>The repo fleet</b><span class="mut">Role, conformance score and visibility.</span></div>
+    <div class="card"><b>Search &amp; CSV export</b><span class="mut">Filter any view and take it away as a sheet.</span></div>
+    <div class="card"><b>EN / हिन्दी / ગુજરાતી</b><span class="mut">Language and light/dark, remembered.</span></div>
+  </div>
+
+  <h2>How it works</h2>
+  <p class="mut">The app bundles a read-only snapshot of the system (<code>data.js</code>,
+  generated from <code>forge</code> and <code>registry</code>) and reads it with a tiny
+  zero-dependency engine (<code>forge.js</code>) that is unit-tested headlessly. It never
+  fetches anything at runtime, so it works from a plane, a train or a locked-down
+  laptop.</p>
+
+  <footer>
+    Built with <a href="https://github.com/drsamonline/forge">Forge</a> on the shared
+    <a href="https://drsamonline.github.io/web-kit/">web-kit</a>. MIT. © 2026 Dr Sohil Momin.
+  </footer>
+</main>
+</body>
+</html>
