@@ -1,7 +1,7 @@
 # Companion Forge
 
 [![live](https://img.shields.io/badge/live-online-22c55e)](https://drsamonline.github.io/app-companion-forge/)
-[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![license](https://img.shields.io/badge/license-PolyForm Noncommercial-blue)](LICENSE)
 [![download](https://img.shields.io/github/v/release/drsamonline/app-companion-forge
 
 **The drsamonline Forge system in your pocket.** The build queue, the state, the
