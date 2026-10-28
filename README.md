@@ -7,7 +7,7 @@
 <!-- shot:end -->
 
 [![live](https://img.shields.io/badge/live-online-22c55e)](https://drsamonline.github.io/app-companion-forge/)
-[![license](https://img.shields.io/badge/license-PolyForm Noncommercial-blue)](LICENSE)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 [![download](https://img.shields.io/github/v/release/drsamonline/app-companion-forge
 
 **The drsamonline Forge system in your pocket.** The build queue, the state, the
